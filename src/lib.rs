@@ -14,13 +14,11 @@
 //! // color => "hsl(179, 99%, 10%)"
 //! ```
 
-extern crate rand;
+
 
 mod color_dictionary;
 
 use color_dictionary::{ColorDictionary, ColorInformation};
-use rand::rngs::SmallRng;
-use rand::{Rng, SeedableRng};
 use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
 
@@ -125,7 +123,7 @@ impl RandomColor {
         let rgb = self.hsv_to_rgb(h, s, b);
         match self.alpha {
             Some(alpha) => a = alpha,
-            None => a = rand::random(),
+            None => a = fastrand::f32(),
         }
 
         format!("rgba({}, {}, {}, {})", rgb[0], rgb[1], rgb[2], a)
@@ -149,7 +147,7 @@ impl RandomColor {
         let hsv = self.hsv_to_hsl(h, s, b);
         match self.alpha {
             Some(alpha) => a = alpha,
-            None => a = rand::random(),
+            None => a = fastrand::f32(),
         }
         format!("hsl({}, {}%, {}%, {})", hsv[0], hsv[1], hsv[2], a)
     }
@@ -220,8 +218,11 @@ impl RandomColor {
         }
 
         match self.seed {
-            None => SmallRng::from_entropy().gen_range(min, max),
-            Some(seed) => SmallRng::seed_from_u64(seed as u64).gen_range(min, max),
+            None => fastrand::i64(min..max),
+            Some(seed) => {
+                fastrand::seed(seed);
+                fastrand::i64(min..max)
+            },
         }
     }
 
@@ -441,7 +442,7 @@ mod tests {
             .alpha(1.0)
             .to_hsv_array();
 
-        assert_eq!(test_case, [189, 40, 91]);
+        assert_eq!(test_case, [232, 43, 96]);
     }
     #[test]
     fn generates_color_as_rgb_string() {
@@ -452,7 +453,7 @@ mod tests {
             .alpha(1.0)
             .to_rgb_string();
 
-        assert_eq!(test_case, "rgb(139, 218, 232)");
+        assert_eq!(test_case, "rgb(139, 153, 244)");
     }
     #[test]
     fn generates_color_as_rgba_string() {
@@ -463,7 +464,7 @@ mod tests {
             .alpha(1.0)
             .to_rgba_string();
 
-        assert_eq!(test_case, "rgba(139, 218, 232, 1)");
+        assert_eq!(test_case, "rgba(139, 153, 244, 1)");
     }
     #[test]
     fn generates_color_as_rgb_array() {
@@ -474,7 +475,7 @@ mod tests {
             .alpha(1.0)
             .to_rgb_array();
 
-        assert_eq!(test_case, [139, 218, 232]);
+        assert_eq!(test_case, [139, 153, 244]);
     }
     #[test]
     fn generates_color_as_hsl_string() {
@@ -485,7 +486,7 @@ mod tests {
             .alpha(1.0)
             .to_hsl_string();
 
-        assert_eq!(test_case, "hsl(189, 66%, 27%)");
+        assert_eq!(test_case, "hsl(232, 83%, 24%)");
     }
     #[test]
     fn generates_color_as_hsla_string() {
@@ -496,7 +497,7 @@ mod tests {
             .alpha(1.0)
             .to_hsla_string();
 
-        assert_eq!(test_case, "hsl(189, 66%, 27%, 1)");
+        assert_eq!(test_case, "hsl(232, 83%, 24%, 1)");
     }
     #[test]
     fn generates_color_as_hsl_array() {
@@ -507,7 +508,7 @@ mod tests {
             .alpha(1.0)
             .to_hsl_array();
 
-        assert_eq!(test_case, [189, 66, 27]);
+        assert_eq!(test_case, [232, 83, 24]);
     }
     #[test]
     fn generates_color_as_hex() {
@@ -518,7 +519,7 @@ mod tests {
             .alpha(1.0)
             .to_hex();
 
-        assert_eq!(test_case, "#8bdae8");
+        assert_eq!(test_case, "#8b99f4");
     }
 
     #[test]
@@ -547,6 +548,6 @@ mod tests {
             .to_hex();
 
         println!("test_case: {}", test_case);
-        assert_eq!(test_case, "#0f0d93");
+        assert_eq!(test_case, "#090584");
     }
 }
