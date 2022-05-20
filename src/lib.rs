@@ -15,6 +15,7 @@
 //! ```
 
 
+extern crate fastrand;
 
 mod color_dictionary;
 
